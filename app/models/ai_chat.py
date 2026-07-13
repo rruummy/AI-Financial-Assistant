@@ -5,6 +5,7 @@ from sqlalchemy import ForeignKey, String, DateTime, Numeric, Text, func
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import (DeclarativeBase, Mapped, Session,
                             mapped_column, relationship)
+from app.core.db_base import Base
 
 class AIChat(Base):
     __tablename__ = 'ai_chat'
