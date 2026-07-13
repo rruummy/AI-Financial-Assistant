@@ -3,7 +3,7 @@ from enum import Enum
 from datetime import datetime
 from sqlalchemy import ForeignKey, String, DateTime, Numeric, Text, func
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import (DeclarativeBase, Mapped,
+from sqlalchemy.orm import (DeclarativeBase, Mapped, Session,
                             mapped_column, relationship)
 
 class Base(DeclarativeBase):
@@ -62,3 +62,23 @@ class AIChat(Base):
     answer: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),)
     user: Mapped["User"] = relationship(back_populates="ai_chats",)
+
+from sqlalchemy import create_engine, select
+
+DATABASE_URL = "postgresql+psycopg://postgres:admin@localhost:5432/expense_tracker"
+engine = create_engine(DATABASE_URL, echo=True)
+
+Base.metadata.create_all(engine)
+
+with Session(engine) as s:
+    s.add(User(email="example1@gmail.com", password_hash="aasd$%sad*12SA6865123SAD%^&*9DF6dsfA=5A5=A++++0",
+               name="User1"))
+    s.add(User(email="example2@gmail.com", password_hash="aasd$%sad*asdg4ersfasz23SAD%^&*9DF6dsfA=5A5=A++++0",
+               name="User2"))
+    s.commit()
+
+with Session(engine) as s:
+    get_user = select(User).where(User.name == "User2")
+    user = s.scalars(get_user).one()
+    print(user)
+
