@@ -3,9 +3,8 @@ from enum import Enum
 from datetime import datetime
 from sqlalchemy import ForeignKey, String, DateTime, Numeric, Text, func
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import (DeclarativeBase, Mapped, Session,
-                            mapped_column, relationship)
-from app.core.db_base import Base
+from sqlalchemy.orm import (Mapped, mapped_column, relationship)
+from app.core.db import Base
 
 class CategoryType(str, Enum):
     INCOME = "income"
