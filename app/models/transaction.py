@@ -16,5 +16,6 @@ class Transaction(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),)
+    
     user: Mapped["User"] = relationship(back_populates="transactions",)
     category: Mapped["Category"] = relationship(back_populates="transactions",)
