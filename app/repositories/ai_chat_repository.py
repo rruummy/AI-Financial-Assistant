@@ -1,11 +1,9 @@
-class CategoryRepository:
+class AIChatRepository:
     def create():
         pass
     def get_by_id():
         pass
-    def get_by_user():
-        pass
-    def update():
+    def get_history():
         pass
     def delete():
         pass
