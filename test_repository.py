@@ -6,23 +6,14 @@ session = SessionLocal()
 
 repo = UserRepository(session)
 
-"""user = repo.create(
-    UserCreate(
-        email="test2@test.com",
-        name="TR1",
-        password="12345678",
-    ),
-    password_hash="HASH123456",
-)
-
-print(user.id)"""
-data = repo.get_by_email("new@test.com")
-if data:
-    print(f"new: {data.name} | {data.email}")
-else: print("There's not user with this email.")
-
-repo.delete(data)
-data = repo.get_by_email("new@test.com")
-if data:
-    print(f"new: {data.name} | {data.email}")
-else: print("There's not user with this email.")
+"""for i in range(10):
+    email_pattern = f"test_{i}@example.com"
+    name_pattern = f"name_test_{i}"
+    user = UserCreate(
+            email=email_pattern,
+            name=name_pattern,
+            password="12w3e4567",
+        )
+    repo.create(user, "HASH6767")"""
+for strings in repo.get_all():
+    print(f"{strings.id} | {strings.name} | {strings.email}")

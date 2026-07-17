@@ -28,9 +28,9 @@ class UserRepository:
         stmt = select(User).where(User.email == user_email)
         return self.session.scalar(stmt)
 
-    def get_all(self):
+    def get_all(self) -> list:
         stmt = select(User)
-        return list(self.session.scalar(stmt))
+        return list(self.session.scalars(stmt))
 
     def update(self, user: User) -> User:
         self.session.commit()
