@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from app.models.category import Category
+from app.models.category import Category, CategoryType
 from app.schemas.category import CategoryCreate
 
 class CategoryRepository:
@@ -25,9 +25,10 @@ class CategoryRepository:
         stmt = select(Category).where(Category.user_id == user_id)
         return self.session.scalars(stmt).all()
 
-    def get_by_name(self, user_id: int, category_name: str) -> Category | None:
+    def get_by_name_and_type(self, user_id: int, category_name: str, category_type: CategoryType) -> Category | None:
         stmt = select(Category).where(Category.user_id == user_id,
-                                      Category.name == category_name)
+                                      Category.name == category_name,
+                                      Category.type == category_type,)
         return self.session.scalar(stmt)
 
     def update(self, category: Category) -> Category:

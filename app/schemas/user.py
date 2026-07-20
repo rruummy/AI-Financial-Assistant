@@ -9,7 +9,6 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     name: str | None = Field(min_length=2, max_length=50)
-    password: str | None = Field(min_length=8, max_length=128)
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -18,3 +17,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     name: str
     created_at: datetime
+
+class PasswordChange(BaseModel):
+    old_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)

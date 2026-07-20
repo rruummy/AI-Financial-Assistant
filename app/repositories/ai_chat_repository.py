@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from app.models.ai_chat import AIChat
 
 class AIChatRepository:
@@ -31,4 +31,10 @@ class AIChatRepository:
 
     def delete(self, chat: AIChat) -> None:
         self.session.delete(chat)
+        self.session.commit()
+
+    def clear_history(self, user_id: int) -> None:
+        stmt = delete(AIChat).where(AIChat.user_id == user_id)
+
+        self.session.execute(stmt)
         self.session.commit()
