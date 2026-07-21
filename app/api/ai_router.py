@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import get_ai_service, get_current_user
 from app.models.user import User
-from app.schemas.ai import AIQuestion, AIAnswer, CategorizeRequest, CategorizeResponse, ForecastResponse
+from app.schemas.ai import AIQuestion, AIAnswer, ForecastResponse
 from app.services.ai_service import AIService
 
 router = APIRouter(prefix="/ai", tags=["AI"])
@@ -19,20 +19,6 @@ def chat(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
-@router.post("/categorize", response_model=CategorizeResponse)
-def categorize_transaction(
-    request: CategorizeRequest,
-    current_user: User = Depends(get_current_user),
-    ai_service: AIService = Depends(get_ai_service)):
-    try:
-        return ai_service.categorize_transaction(
-            user_id=current_user.id,
-            description=request.description,
-            amount=request.amount)
-
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.get("/forecast", response_model=ForecastResponse)
 def forecast_expenses(

@@ -19,7 +19,7 @@ from app.services.ai_service import AIService
 from app.services.llm_service import LLMService
 
 
-# DATABASE
+# DATABASE 
 
 def get_db():
     db = SessionLocal()
@@ -33,19 +33,27 @@ def get_db():
 
 # REPOSITORIES
 
-def get_user_repository(db: Session = Depends(get_db)):
+def get_user_repository(
+    db: Session = Depends(get_db),
+):
     return UserRepository(db)
 
 
-def get_category_repository(db: Session = Depends(get_db)):
+def get_category_repository(
+    db: Session = Depends(get_db),
+):
     return CategoryRepository(db)
 
 
-def get_transaction_repository(db: Session = Depends(get_db)):
+def get_transaction_repository(
+    db: Session = Depends(get_db),
+):
     return TransactionRepository(db)
 
 
-def get_ai_chat_repository(db: Session = Depends(get_db)):
+def get_ai_chat_repository(
+    db: Session = Depends(get_db),
+):
     return AIChatRepository(db)
 
 
@@ -57,19 +65,25 @@ def get_auth_service(repository: UserRepository = Depends(get_user_repository)) 
 
 def get_user_service(
     repository: UserRepository = Depends(get_user_repository),
-    auth_service: AuthService = Depends(get_auth_service)):
+    auth_service: AuthService = Depends(get_auth_service),
+):
     return UserService(repository, auth_service)
 
 
 def get_category_service(
-    repository: CategoryRepository = Depends(get_category_repository)):
+    repository: CategoryRepository = Depends(get_category_repository),
+):
     return CategoryService(repository)
 
 
 def get_transaction_service(
     transaction_repository: TransactionRepository = Depends(get_transaction_repository),
-    category_repository: CategoryRepository = Depends(get_category_repository),):
-    return TransactionService(transaction_repository, category_repository)
+    category_repository: CategoryRepository = Depends(get_category_repository),
+):
+    return TransactionService(
+        transaction_repository,
+        category_repository,
+    )
 
 
 def get_llm_service():
@@ -78,23 +92,36 @@ def get_llm_service():
 
 def get_ai_service(
     ai_repository: AIChatRepository = Depends(get_ai_chat_repository),
-    transaction_repository: TransactionRepository = Depends(get_transaction_repository),
-    category_repository: CategoryRepository = Depends(get_category_repository),
-    llm_service: LLMService = Depends(get_llm_service),):
-    return AIService(ai_repository, transaction_repository, category_repository, llm_service)
+    transaction_service: TransactionService = Depends(get_transaction_service),
+    category_service: CategoryService = Depends(get_category_service),
+    llm_service: LLMService = Depends(get_llm_service),
+):
+    return AIService(
+        ai_repository,
+        transaction_service,
+        category_service,
+        llm_service,
+    )
 
 
 # AUTH
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login",)
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login",
+)
 
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    auth_service: AuthService = Depends(get_auth_service)) -> User:
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
 
     try:
         return auth_service.get_current_user(token)
 
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+        )

@@ -1,54 +1,24 @@
-from datetime import datetime, timedelta, timezone
-
-from jose import JWTError, jwt
-from pwdlib import PasswordHash
-
+from app.core import security
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import Token
 
-SECRET_KEY = "very-secret-key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
 
 class AuthService:
-    password_hash = PasswordHash.recommended()
-
     def __init__(self, repository: UserRepository | None = None):
         self.repository = repository
 
     def hash_password(self, password: str) -> str:
-        return self.password_hash.hash(password)
+        return security.hash_password(password)
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self.password_hash.verify(plain_password, hashed_password)
+        return security.verify_password(plain_password, hashed_password)
 
     def create_access_token(self, user_id: int) -> str:
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-        payload = {
-            "sub": str(user_id),
-            "exp": expire,
-        }
-
-        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        return security.create_access_token(user_id)
 
     def verify_access_token(self, token: str) -> int:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
-            user_id = payload.get("sub")
-
-            if user_id is None:
-                raise ValueError("Invalid token.")
-
-            return int(user_id)
-
-        except JWTError:
-            raise ValueError("Invalid token.")
+        return security.decode_access_token(token)
 
     def authenticate_user(self, email: str, password: str) -> User:
         if self.repository is None:
