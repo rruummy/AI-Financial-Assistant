@@ -10,12 +10,12 @@ class TransactionRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, transaction_data: TransactionCreate) -> Transaction:
+    def create(self, transaction_data: TransactionCreate, user_id: int) -> Transaction:
         transaction = Transaction(
             amount = transaction_data.amount,
             description = transaction_data.description,
             category_id = transaction_data.category_id,
-            user_id = transaction_data.user_id,
+            user_id = user_id,
         )
         self.session.add(transaction)
         self.session.commit()

@@ -2,7 +2,7 @@ from app.repositories.ai_chat_repository import AIChatRepository
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.transaction_repository import TransactionRepository
 from app.services.llm_service import LLMService
-from app.schemas.ai import AIAnswer, CategorizeRequest, CategorizeResponse, ForecastResponse
+from app.schemas.ai import AIAnswer, CategorizeResponse, ForecastResponse
 
 class AIService:
     def __init__(self, ai_repository: AIChatRepository,
@@ -14,7 +14,7 @@ class AIService:
         self.category_repository = category_repository
         self.llm_service = llm_service
         
-    def ask_question(self, user_id: int, question: str) -> AIAnswer:
+    def chat(self, user_id: int, question: str) -> AIAnswer:
         history = self.ai_repository.get_last_messages(user_id=user_id, limit=5)
 
         answer = self.llm_service.ask(question=question, history=history)
@@ -22,13 +22,13 @@ class AIService:
         self.ai_repository.create(user_id=user_id, question=question, answer=answer)
         return AIAnswer(answer=answer)
 
-    def categorize_transaction(self, user_id: int, request: CategorizeRequest) -> CategorizeRequest:
+    def categorize_transaction(self, user_id: int, description: str, amount: float) -> CategorizeResponse:
         categories = self.category_repository.get_by_user(user_id)
 
-        result = self.llm_service.categorize(description=request.description,
-                                             amount=request.amount,
+        result = self.llm_service.categorize(description=description,
+                                             amount=amount,
                                              categories=categories)
-        return CategorizeRequest(**request)
+        return CategorizeResponse(**result)
 
     def forecast_expenses(self, user_id: int) -> ForecastResponse:
         transactions = self.transaction_repository.get_by_user(user_id)
@@ -37,7 +37,7 @@ class AIService:
 
         return ForecastResponse(**result)
 
-    def get_chat_history(self, user_id: int):
+    def get_history(self, user_id: int):
         return self.ai_repository.get_history(user_id)
 
     def get_last_messages(self, user_id: int, limit: int = 5):

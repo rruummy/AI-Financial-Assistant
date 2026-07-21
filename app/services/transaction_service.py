@@ -12,16 +12,16 @@ class TransactionService:
         self.category_repository = category_repository 
 
     # CRUD
-    def create_transaction(self, transaction_data: TransactionCreate) -> Transaction:
+    def create_transaction(self, transaction_data: TransactionCreate, user_id: int) -> Transaction:
         category = self.category_repository.get_by_id(transaction_data.category_id)
 
         if category is None:
             raise ValueError("Transaction not found.")
 
-        if category.user_id != transaction_data.user_id:
+        if category.user_id != user_id:
             raise ValueError("Category does not belong to this user.")
 
-        return self.transaction_repository.create(transaction_data)
+        return self.transaction_repository.create(transaction_data, user_id)
     
     def get_transaction(self, transaction_id: int) -> Transaction:
         transaction = self.transaction_repository.get_by_id(transaction_id)
@@ -31,7 +31,7 @@ class TransactionService:
 
         return transaction        
 
-    def get_user_transaction(self, user_id: int) -> list[Transaction]:
+    def get_user_transactions(self, user_id: int) -> list[Transaction]:
         return self.transaction_repository.get_by_user(user_id)
 
     def update_transaction(self, transaction_id: int, transaction_data: TransactionUpdate):
@@ -66,10 +66,10 @@ class TransactionService:
         self.transaction_repository.delete(transaction)
 
     # Search
-    def get_transaction_by_category(self, user_id: int, category_id: int) -> list[Transaction]:
+    def get_transactions_by_category(self, user_id: int, category_id: int) -> list[Transaction]:
         return self.transaction_repository.get_by_category(user_id=user_id, category_id=category_id)
 
-    def get_transaction_by_period(self, user_id: int,
+    def get_transactions_by_period(self, user_id: int,
                                   start_date: datetime,
                                   end_date: datetime) -> list[Transaction]:
         if start_date > end_date:

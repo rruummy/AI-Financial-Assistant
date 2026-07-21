@@ -26,20 +26,7 @@ class LLMService:
         return json.loads(text.strip())
 
     def ask(self, question: str, history: list[AIChat]) -> str:
-        messages = []
-        for msg in reversed(history):
-            messages.append({
-                "role": "user",
-                "content": msg.question,
-            })
-            messages.append({
-                "role": "assistant",
-                "content": msg.answer,
-            })
-        messages.append({
-            "role": "user",
-            "content": msg.question,
-            })
+        messages = build_chat_messages(question=question, history=history)
         response = chat(model=self.model, messages=messages,)
 
         return response.message.content

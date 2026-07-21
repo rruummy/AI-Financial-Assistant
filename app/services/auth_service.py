@@ -1,47 +1,60 @@
 from datetime import datetime, timedelta, timezone
-import jwt
+
+from jose import JWTError, jwt
 from pwdlib import PasswordHash
-from passlib.context import CryptContext
+
+from app.models.user import User
 from app.repositories.user_repository import UserRepository
+from app.schemas.auth import Token
 
 SECRET_KEY = "very-secret-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class AuthService:
-    def __init__(self, secret_key: str,
-                 algorithm: str = "HS256",
-                 access_token_expire_minutes: int = 30):
-        self.password_hash = PasswordHash.recommended()
-        self.secret_key = secret_key
-        self.algorithm = algorithm
-        self.access_token_expire_minutes = access_token_expire_minutes
-    
+    password_hash = PasswordHash.recommended()
+
+    def __init__(self, repository: UserRepository | None = None):
+        self.repository = repository
+
     def hash_password(self, password: str) -> str:
         return self.password_hash.hash(password)
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return self.password_hash.verify(plain_password, hashed_password)
-    
+
     def create_access_token(self, user_id: int) -> str:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=self.access_token_expire_minutes)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
         payload = {
             "sub": str(user_id),
             "exp": expire,
         }
 
-        token = jwt.encode(payload, self.secret_key, algorithm = self.algorithm)
-
-        return token
+        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     def verify_access_token(self, token: str) -> int:
-        payload = jwt.decode(self.secret_key, algorithms=[self.algorithm])
-        return int(payload("sub"))
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-    def login(self, repository: UserRepository, email: str, password: str) -> str:
-        user = repository.get_by_email(email)
+            user_id = payload.get("sub")
+
+            if user_id is None:
+                raise ValueError("Invalid token.")
+
+            return int(user_id)
+
+        except JWTError:
+            raise ValueError("Invalid token.")
+
+    def authenticate_user(self, email: str, password: str) -> User:
+        if self.repository is None:
+            raise ValueError("Repository is not configured.")
+
+        user = self.repository.get_by_email(email)
 
         if user is None:
             raise ValueError("Incorrect email or password.")
@@ -49,5 +62,27 @@ class AuthService:
         if not self.verify_password(password, user.password_hash):
             raise ValueError("Incorrect email or password.")
 
-        return self.create_access_token(user.id)
-   
+        return user
+
+    def login(self, email: str, password: str) -> Token:
+        user = self.authenticate_user(email, password)
+
+        token = self.create_access_token(user.id)
+
+        return Token(
+            access_token=token,
+            token_type="bearer",
+        )
+
+    def get_current_user(self, token: str) -> User:
+        if self.repository is None:
+            raise ValueError("Repository is not configured.")
+
+        user_id = self.verify_access_token(token)
+
+        user = self.repository.get_by_id(user_id)
+
+        if user is None:
+            raise ValueError("User not found.")
+
+        return user

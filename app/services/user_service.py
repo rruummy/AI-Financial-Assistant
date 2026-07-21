@@ -34,13 +34,12 @@ class UserService:
 
             if existing_user:
                 raise ValueError("Email already exists.")
-        user.email = user_data.email
 
-        if user_data.password is not None:
-            user.password_hash = self.auth_service.hash_password(user_data.password)
+        if user_data.email is not None:
+            user.email = user_data.email
 
         if user_data.name is not None:
-            user.password_hash = self.auth_service.hash_password(user_data.password)
+            user.name = user_data.name
 
         return self.repository.update(user)
 

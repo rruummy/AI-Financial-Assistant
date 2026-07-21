@@ -7,10 +7,10 @@ class CategoryRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, category_data: CategoryCreate) -> Category:
+    def create(self, category_data: CategoryCreate, user_id: int) -> Category:
         category = Category(name = category_data.name,
-                            type = category_data.type,
-                            user_id = category_data.user_id)
+                            type = category_data.category_type,
+                            user_id = user_id)
         
         self.session.add(category)
         self.session.commit()

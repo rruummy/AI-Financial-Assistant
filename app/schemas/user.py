@@ -8,7 +8,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
-    name: str | None = Field(min_length=2, max_length=50)
+    name: str | None = Field(default=None, min_length=2, max_length=50)
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
