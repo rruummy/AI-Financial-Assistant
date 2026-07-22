@@ -1,8 +1,5 @@
-from decimal import Decimal
-from enum import Enum
 from datetime import datetime
-from sqlalchemy import ForeignKey, String, DateTime, Numeric, Text, func
-from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import (Mapped, mapped_column, relationship)
 from app.core.db import Base
 

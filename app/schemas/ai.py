@@ -1,5 +1,4 @@
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 class AIQuestion(BaseModel):
     question: str
